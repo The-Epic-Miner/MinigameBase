@@ -1,6 +1,6 @@
 <?php
 
-namespace thebigsmileXD\BetterLogin;
+namespace thebigsmileXD\MinigameBase;
 
 use pocketmine\plugin\PluginBase;
 use pocketmine\event\Listener;
@@ -9,21 +9,45 @@ use pocketmine\command\CommandSender;
 use pocketmine\command\Command;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\command\ConsoleCommandSender;
-use pocketmine\utils\TextFormat;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\player\PlayerItemConsumeEvent;
 use pocketmine\event\player\PlayerQuitEvent;
-use pocketmine\event\player\PlayerCommandPreprocessEvent;
 use pocketmine\utils\Config;
+use pocketmine\event\player\PlayerDropItemEvent;
+use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\player\PlayerBucketEvent;
+use pocketmine\event\entity\EntityArmorChangeEvent;
+use pocketmine\event\entity\EntityInventoryChangeEvent;
+use pocketmine\event\entity\EntityRegainHealthEvent;
+use pocketmine\event\entity\EntityShootBowEvent;
+use pocketmine\event\entity\EntityTeleportEvent;
+use pocketmine\event\entity\EntityDamageByBlockEvent;
 
 class Main extends PluginBase implements Listener{
 	public $runningGames = [];
 	public $database;
 	public $useSQL = false;
 	public $worlds = [];
+	public $disableMove = false;
+	public $disableChat = false;
+	public $disableInteract = false;
+	public $disableBreak = false;
+	public $disablePlace = false;
+	public $disableItemConsume = false;
+	public $disableDrop = false;
+	public $disableDamage = false;
+	public $disablePlayerDeath = false;
+	public $disableBucketUse = false;
+	public $disableTeleport = false;
+	public $disableBowUse = false;
+	public $disableHealthRegeneration = false;
+	public $disableInventoryChange = false;
+	public $disableArmorChange = false;
+	public $disableBucketUse = false;
+	public $disableCollisionDamage = false;
 
 	public function onEnable(){
 		$this->makeSaveFiles();
@@ -130,41 +154,106 @@ class Main extends PluginBase implements Listener{
 	}
 
 	/* eventhandler */
-	
-	// Chat event already handled above
-	public function onMove(PlayerMoveEvent $event){
-		if(!$this->isLoggedIn($event->getPlayer())) $event->setCancelled();
-		return;
-	}
-
-	public function onInteract(PlayerInteractEvent $event){
-		if(!$this->isLoggedIn($event->getPlayer())) $event->setCancelled();
-		return;
-	}
-
-	public function onBreak(BlockBreakEvent $event){
-		if(!$this->isLoggedIn($event->getPlayer())) $event->setCancelled();
-		return;
-	}
-
-	public function onPlace(BlockPlaceEvent $event){
-		if(!$this->isLoggedIn($event->getPlayer())) $event->setCancelled();
-		return;
-	}
-
-	public function onItemConsume(PlayerItemConsumeEvent $event){
-		if(!$this->isLoggedIn($event->getPlayer())) $event->setCancelled();
-		return;
-	}
-
 	public function onQuit(PlayerQuitEvent $event){
 		$this->loggedInPlayers[$event->getPlayer()->getName()] = null;
 		unset($this->loggedInPlayers[$event->getPlayer()->getName()]);
 		return;
 	}
 
+	public function onMove(PlayerMoveEvent $event){
+		if($this->disableMove) $event->setCancelled();
+		return;
+	}
+
+	public function onInteract(PlayerInteractEvent $event){
+		if($this->disableInteract) $event->setCancelled();
+		return;
+	}
+
+	public function onBreak(BlockBreakEvent $event){
+		if($this->disableBreak) $event->setCancelled();
+		return;
+	}
+
+	public function onPlace(BlockPlaceEvent $event){
+		if($this->disablePlace) $event->setCancelled();
+		return;
+	}
+
+	public function onItemConsume(PlayerItemConsumeEvent $event){
+		if($this->disableItemConsume) $event->setCancelled();
+		return;
+	}
+
 	public function onChat(PlayerChatEvent $event){
-		if(!$this->isLoggedIn($event->getPlayer())) $event->setCancelled();
+		if($this->disableChat) $event->setCancelled();
+		return;
+	}
+
+	public function onDrop(PlayerDropItemEvent $event){
+		if($this->disableDrop) $event->setCancelled();
+		return;
+	}
+
+	public function onDamage(EntityDamageEvent $event){
+		if($event->getEntity() instanceof Player){
+			if($this->disableDamage) $event->setCancelled();
+			elseif($this->disableCollisionDamage && $event->getCause() instanceof EntityDamageByBlockEvent){
+				if($this->disableCollisionDamage) $event->setCancelled();
+			}
+		}
+		return;
+	}
+
+	public function onPlayerDeath(EntityDamageEvent $event){
+		if($event->getEntity() instanceof Player){
+			if($this->disablePlayerDeath){
+				if($event->getDamage() >= $event->getEntity()->getHealth()){
+					$event->setDamage(0.0);
+					$event->getEntity()->setHealth(20);
+				}
+			}
+		}
+		return;
+	}
+
+	public function onBucketUse(PlayerBucketEvent $event){
+		if($this->disableBucketUse) $event->setCancelled();
+		return;
+	}
+
+	public function onArmorChange(EntityArmorChangeEvent $event){
+		if($event->getEntity() instanceof Player){
+			if($this->disableArmorChange) $event->setCancelled();
+		}
+		return;
+	}
+
+	public function onInventoryChange(EntityInventoryChangeEvent $event){
+		if($event->getEntity() instanceof Player){
+			if($this->disableInventoryChange) $event->setCancelled();
+		}
+		return;
+	}
+
+	public function onHealthRegeneration(EntityRegainHealthEvent $event){
+		if($event->getEntity() instanceof Player){
+			if($this->disableHealthRegeneration) $event->setCancelled(); // problems with onPlayerDeath because of sethealth?
+		}
+		return;
+	}
+
+	public function onBowUse(EntityShootBowEvent $event){
+		if($event->getEntity() instanceof Player){
+			if($this->disableBowUse) $event->setCancelled();
+		}
+		return;
+	}
+
+	public function onTeleport(EntityTeleportEvent $event){
+		if($event->getEntity() instanceof Player){
+			if($this->disableTeleport) $event->setCancelled();
+		}
 		return;
 	}
 }
