@@ -1,0 +1,17 @@
+  name: MinigameBase
+  main: thebigsmileXD\MinigameBase\Main
+  version: 0.0.1
+  api: 1.0.0
+  load: POSTWORLD
+  prefix: "MinigameBase"
+  authors: [thebigsmileXD]
+  description: "A base for Minigames"
+  commands:
+   game:
+    description: "game"
+    usage: "/game <subcommand>"
+    permission: game
+  permissions:
+    game:
+      description: Permission for /game command.
+      default: true
