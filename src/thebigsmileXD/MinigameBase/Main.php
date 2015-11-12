@@ -46,7 +46,6 @@ class Main extends PluginBase implements Listener{
 	public $disableHealthRegeneration = false;
 	public $disableInventoryChange = false;
 	public $disableArmorChange = false;
-	public $disableBucketUse = false;
 	public $disableCollisionDamage = false;
 
 	public function onEnable(){
