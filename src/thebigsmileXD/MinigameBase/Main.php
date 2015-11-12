@@ -50,6 +50,8 @@ class Main extends PluginBase implements Listener{
 	public $disableInventoryChange = false;
 	public $disableArmorChange = false;
 	public $disableCollisionDamage = false;
+	public $useTimer = false;
+	public $messages = false;
 
 	public function onEnable(){
 		$this->makeSaveFiles();
@@ -63,9 +65,8 @@ class Main extends PluginBase implements Listener{
 		$this->saveResource("config.yml", false);
 		$this->saveResource("messages.yml", false);
 		$this->reloadConfig();
-		// $this->messages = new Config("messages.yml");
-		// $this->messages->save();
 		$this->getConfig()->save();
+		$this->messages = new Config($this->getDataFolder() . "messages.yml", Config::YAML);
 	}
 
 	/* input handling */
@@ -246,7 +247,7 @@ class Main extends PluginBase implements Listener{
 	}
 
 	public function onHealthRegeneration(EntityRegainHealthEvent $event){
-		if($event->getEntity() instanceof Player && $event->getRegainReason() !== EntityRegainHealthEvent::CAUSE_MAGIC){ // fixed setHealth being cancelled
+		if($event->getEntity() instanceof Player && $event->getRegainReason() !== EntityRegainHealthEvent::CAUSE_MAGIC){
 			if($this->disableHealthRegeneration) $event->setCancelled();
 		}
 		return;
