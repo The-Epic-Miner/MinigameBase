@@ -25,6 +25,9 @@ use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\entity\EntityShootBowEvent;
 use pocketmine\event\entity\EntityTeleportEvent;
 use pocketmine\event\entity\EntityDamageByBlockEvent;
+use pocketmine\event\player\PlayerEvent;
+use pocketmine\event\player\PlayerBucketFillEvent;
+use pocketmine\event\player\PlayerBucketEmptyEvent;
 
 class Main extends PluginBase implements Listener{
 	public $runningGames = [];
@@ -59,7 +62,9 @@ class Main extends PluginBase implements Listener{
 		$this->reloadConfig();
 		$this->saveResource("config.yml", false);
 		$this->saveResource("messages.yml", false);
-		$this->messages = new Config("messages.yml");
+		$this->reloadConfig();
+		// $this->messages = new Config("messages.yml");
+		// $this->messages->save();
 		$this->getConfig()->save();
 	}
 
@@ -216,7 +221,12 @@ class Main extends PluginBase implements Listener{
 		return;
 	}
 
-	public function onBucketUse(PlayerBucketEvent $event){
+	public function onBucketFill(PlayerBucketFillEvent $event){
+		if($this->disableBucketUse) $event->setCancelled();
+		return;
+	}
+
+	public function onBucketEmpty(PlayerBucketEmptyEvent $event){
 		if($this->disableBucketUse) $event->setCancelled();
 		return;
 	}
@@ -236,8 +246,8 @@ class Main extends PluginBase implements Listener{
 	}
 
 	public function onHealthRegeneration(EntityRegainHealthEvent $event){
-		if($event->getEntity() instanceof Player){
-			if($this->disableHealthRegeneration) $event->setCancelled(); // problems with onPlayerDeath because of sethealth?
+		if($event->getEntity() instanceof Player && $event->getRegainReason() !== EntityRegainHealthEvent::CAUSE_MAGIC){ // fixed setHealth being cancelled
+			if($this->disableHealthRegeneration) $event->setCancelled();
 		}
 		return;
 	}
