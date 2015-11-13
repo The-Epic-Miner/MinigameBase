@@ -1,5 +1,5 @@
 ---
-german:
- - no-permission: "Keine Berechtigung"
- - invalid-arguments: "Falsche Argumente"
+settings:
+ - setting1: "value"
+ - setting2: "value2"
 ...
